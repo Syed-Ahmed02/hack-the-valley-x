@@ -38,13 +38,18 @@ export function AIVoiceInput({
       intervalId = setInterval(() => {
         setTime((t) => t + 1);
       }, 1000);
-    } else {
-      onStop?.(time);
-      setTime(0);
     }
 
     return () => clearInterval(intervalId);
-  }, [submitted, time, onStart, onStop]);
+  }, [submitted, onStart]);
+
+  // Handle stop separately to avoid infinite loop
+  useEffect(() => {
+    if (!submitted && time > 0) {
+      onStop?.(time);
+      setTime(0);
+    }
+  }, [submitted, time, onStop]);
 
   useEffect(() => {
     if (!isDemo) return;
