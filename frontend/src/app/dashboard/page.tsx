@@ -1,161 +1,193 @@
 "use client";
 
-import { VoiceInput } from "@/components/voice-input";
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
+import { VoiceInput } from "@/components/voice-input";
 import {
-  MessageCircle,
-  BarChart3,
+  FileText,
+  Languages,
+  BookOpen,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Mic,
   Settings,
-  HelpCircle,
-  LogOut,
   Brain,
-  Volume2,
-  Wrench,
-  Heart
 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const topicCards = [
+  const recentDocuments = [
     {
-      title: "Recent Advances in Speech Recognition Technologies",
-      description: "Explore cutting-edge developments in AI-powered speech recognition systems and their applications.",
-      icon: Brain,
-      iconColor: "text-blue-500"
+      title: "Lecture Notes - Computer Science 101",
+      description: "Last modified 2 hours ago",
+      icon: FileText,
+      language: "English → Bangla",
     },
     {
-      title: "Enhancing Articulation and Intonation in Speech",
-      description: "Learn techniques to improve clarity, pronunciation, and vocal expression for better communication.",
-      icon: Volume2,
-      iconColor: "text-green-500"
+      title: "Biology Chapter 5 Summary",
+      description: "Last modified yesterday",
+      icon: FileText,
+      language: "English → Hindi",
     },
     {
-      title: "Exploring Speech Enhancement Tools and Techniques",
-      description: "Discover advanced tools and methods for improving audio quality and speech intelligibility.",
-      icon: Wrench,
-      iconColor: "text-orange-500"
+      title: "Mathematics Formulas",
+      description: "Last modified 3 days ago",
+      icon: FileText,
+      language: "English → Urdu",
     },
-    {
-      title: "Impact of Emotions and Intonation on Effective Communication",
-      description: "Understand how emotional context and vocal patterns influence message delivery and reception.",
-      icon: Heart,
-      iconColor: "text-pink-500"
-    }
   ];
 
-  const navigationItems = [
-    { name: "Chats", icon: MessageCircle, active: true },
-    { name: "Reports", icon: BarChart3, active: false },
-    { name: "Settings", icon: Settings, active: false },
-    { name: "Support & Guide", icon: HelpCircle, active: false },
-    { name: "Logout", icon: LogOut, active: false }
+  const quickActions = [
+    {
+      title: "Upload Document",
+      description: "Upload PDFs, notes, or images",
+      icon: FileText,
+      color: "text-blue-500",
+      href: "/upload",
+    },
+    {
+      title: "View Documents",
+      description: "Access your AI summaries",
+      icon: BookOpen,
+      color: "text-purple-500",
+      href: "/documents",
+    },
+    {
+      title: "Settings",
+      description: "Language preferences & account",
+      icon: Settings,
+      color: "text-green-500",
+      href: "/settings",
+    },
+  ];
+
+  const stats = [
+    {
+      title: "Documents Processed",
+      value: "24",
+      icon: FileText,
+      change: "+12%",
+    },
+    {
+      title: "Languages Used",
+      value: "5",
+      icon: Languages,
+      change: "+2",
+    },
+    {
+      title: "Time Saved",
+      value: "18h",
+      icon: Clock,
+      change: "+45%",
+    },
   ];
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div className="w-64 theme-surface-secondary p-6 border-r border-opacity-30">
-        <div className="mb-8">
-          <h1 className="text-xl font-semibold theme-text-primary">VoiceOver</h1>
-          <p className="text-xs theme-text-tertiary mt-1">Voice Analysis Platform</p>
-        </div>
-
-        <nav className="space-y-2">
-          {navigationItems.map((item, index) => {
-            const IconComponent = item.icon;
-            return (
-              <button
-                key={index}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
-                  item.active
-                    ? 'theme-surface-tertiary theme-text-primary font-medium'
-                    : 'theme-text-secondary hover:theme-text-primary hover:theme-surface-tertiary'
-                }`}
-              >
-                <IconComponent className="w-4 h-4" />
-                <span className="text-sm">{item.name}</span>
-              </button>
-            );
-          })}
-        </nav>
+    <div className="space-y-8 py-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold">UnderstandAI</h1>
+        <p className="text-lg text-muted-foreground">
+          Transform your study materials into your preferred language
+        </p>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h1 className="text-2xl font-semibold theme-text-primary">Dashboard</h1>
-            <p className="theme-text-secondary text-sm mt-1">Welcome back! Ready to analyze your voice?</p>
-          </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {stats.map((stat, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                {stat.change} from last month
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-          {/* Profile Section */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 theme-surface-secondary rounded-lg px-3 py-2 border border-opacity-20">
-              <div className="w-8 h-8 theme-accent rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium">MJ</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium theme-text-primary">Mike Johnson</span>
-                <span className="text-xs theme-text-tertiary">2,450 credits</span>
-              </div>
-            </div>
-          </div>
+      {/* Voice Input Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mic className="h-5 w-5 text-brand" />
+            Record Audio Lecture
+          </CardTitle>
+          <CardDescription>
+            Record or upload audio lectures to transcribe and translate
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <VoiceInput />
+        </CardContent>
+      </Card>
+
+      {/* Search Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-brand" />
+            Quick Search
+          </CardTitle>
+          <CardDescription>
+            Search through your uploaded documents and summaries
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GooeySearchBar />
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {quickActions.map((action, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <action.icon className={`h-8 w-8 ${action.color} mb-2`} />
+                <CardTitle className="text-base">{action.title}</CardTitle>
+                <CardDescription>{action.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <a href={action.href}>Get Started</a>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      </div>
 
-        {/* Voice Input Section */}
-        <div className="mb-8">
-          <div className="theme-surface rounded-xl p-8 border border-opacity-20 shadow-sm">
-            <h2 className="text-lg font-medium theme-text-primary mb-6 text-center">
-              Start Voice Recording
-            </h2>
-            <VoiceInput />
-          </div>
-        </div>
-
-        {/* Animated Search Bar */}
-        <div className="mb-8">
-          <div className="flex justify-center items-center p-4">
-            <div className="w-full max-w-lg">
-              <h2 className="text-lg font-medium theme-text-primary mb-4 text-center">
-                Search Topics
-              </h2>
-              <div className="flex justify-center">
-                <GooeySearchBar />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Topic Cards Grid */}
-        <div className="mb-8">
-          <h2 className="text-lg font-medium theme-text-primary mb-6">Discussion Topics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {topicCards.map((topic, index) => {
-              const IconComponent = topic.icon;
-              return (
-                <div
-                  key={index}
-                  className="theme-surface-secondary rounded-lg p-5 hover:theme-surface transition-all duration-200 cursor-pointer group border border-opacity-20 shadow-sm"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="group-hover:scale-105 transition-transform duration-200">
-                      <IconComponent className={`w-6 h-6 ${topic.iconColor}`} />
-                    </div>
-                    <div>
-                      <h3 className="font-medium theme-text-primary mb-1 text-sm">
-                        {topic.title}
-                      </h3>
-                      <p className="theme-text-secondary text-xs leading-relaxed">
-                        {topic.description}
-                      </p>
-                    </div>
-                  </div>
+      {/* Recent Documents */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Recent Documents</h2>
+        <div className="space-y-3">
+          {recentDocuments.map((doc, index) => (
+            <Card key={index} className="hover:bg-accent/50 transition-colors cursor-pointer">
+              <CardHeader className="flex flex-row items-center gap-4 py-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10">
+                  <doc.icon className="h-5 w-5 text-brand" />
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex-1">
+                  <CardTitle className="text-sm">{doc.title}</CardTitle>
+                  <CardDescription className="text-xs">
+                    {doc.description} • {doc.language}
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" size="sm">
+                  View
+                </Button>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
-
       </div>
     </div>
   );
