@@ -41,8 +41,8 @@ export function HeroSection({
   actions,
   image,
 }: HeroProps) {
-  const { resolvedTheme } = useTheme();
-  const imageSrc = resolvedTheme === "light" ? image.light : image.dark;
+  // Use the light image for now to avoid theme issues
+  const imageSrc = image.light;
 
   return (
     <section
@@ -58,15 +58,17 @@ export function HeroSection({
           {badge && (
             <Badge variant="outline" className="animate-appear gap-2">
               <span className="text-muted-foreground">{badge.text}</span>
-              <a href={badge.action.href} className="flex items-center gap-1">
-                {badge.action.text}
-                <ArrowRightIcon className="h-3 w-3" />
-              </a>
+              <Button variant="ghost" size="sm" asChild className="h-auto p-1 text-xs group">
+                <a href={badge.action.href} className="flex items-center gap-1">
+                  {badge.action.text}
+                  <ArrowRightIcon className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1 group-hover:scale-110" />
+                </a>
+              </Button>
             </Badge>
           )}
 
           {/* Title */}
-          <h1 className="relative z-10 inline-block animate-appear bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-8xl md:leading-tight">
+          <h1 className="relative z-10 inline-block animate-appear text-4xl font-bold leading-tight text-foreground drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-8xl md:leading-tight">
             {title}
           </h1>
 
@@ -79,10 +81,26 @@ export function HeroSection({
           <div className="relative z-10 flex animate-appear justify-center gap-4 opacity-0 delay-300">
             <div className="relative z-10 flex animate-appear justify-center gap-4 opacity-0 delay-300">
               {actions.map((action, index) => (
-                <Button key={index} variant={action.variant} size="lg" asChild>
-                  <a href={action.href} className="flex items-center gap-2">
-                    {action.icon}
+                <Button
+                  key={index}
+                  variant={action.variant}
+                  size="lg"
+                  asChild
+                  className={action.variant === "glow" ? "relative overflow-hidden group" : ""}
+                >
+                  <a href={action.href} className="flex items-center gap-2 relative z-10 group">
+                    {action.icon && (
+                      <span className="transition-transform duration-200 group-hover:scale-110">
+                        {action.icon}
+                      </span>
+                    )}
                     {action.text}
+                    {action.variant === "glow" && (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand via-brand-foreground to-brand rounded-lg blur opacity-30 group-hover:opacity-60 transition-opacity duration-200"></div>
+                      </>
+                    )}
                   </a>
                 </Button>
               ))}

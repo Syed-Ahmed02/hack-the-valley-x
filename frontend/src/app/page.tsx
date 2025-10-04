@@ -19,7 +19,7 @@ export default function HomePage() {
         {
           text: "Start Learning",
           href: "/dashboard",
-          icon: <BookOpen className="h-4 w-4" />,
+          icon: <BookOpen className="h-5 w-5" />,
           variant: "glow"
         },
         {
