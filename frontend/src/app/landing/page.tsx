@@ -3,7 +3,7 @@
 import { HeroSection } from "@/components/ui/hero-section";
 import { BookOpen, Upload } from "lucide-react";
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
     <HeroSection
       badge={{
@@ -36,3 +36,4 @@ export default function HomePage() {
     />
   );
 }
+
