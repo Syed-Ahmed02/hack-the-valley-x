@@ -88,7 +88,7 @@ export function AIVoiceInput({
             "group w-16 h-16 rounded-xl flex items-center justify-center transition-colors shadow-lg",
             submitted
               ? "bg-red-500 hover:bg-red-600 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+              : "theme-accent hover:theme-accent-hover text-white"
           )}
           type="button"
           onClick={handleClick}
@@ -103,7 +103,7 @@ export function AIVoiceInput({
           )}
         </button>
 
-        <span className="font-mono text-sm text-gray-600 transition-opacity duration-300">
+        <span className="font-mono text-sm theme-text-secondary transition-opacity duration-300">
           {formatTime(time)}
         </span>
 
@@ -129,7 +129,7 @@ export function AIVoiceInput({
           ))}
         </div>
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs theme-text-tertiary">
           {submitted ? "Listening..." : "Click to speak"}
         </p>
       </div>
