@@ -44,7 +44,7 @@ async def add(a: int, b: int):
     """Add two numbers"""
     return {"result": add_two_numbers(a, b)}
 
-@app.post("/gemini")
+@app.post("/summarize")
 def get_gemini_response(prompt: str) -> str:
     
     client = genai.Client()
@@ -52,6 +52,7 @@ def get_gemini_response(prompt: str) -> str:
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
+
         config=types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(thinking_budget=0) # Disables thinking
         ),
