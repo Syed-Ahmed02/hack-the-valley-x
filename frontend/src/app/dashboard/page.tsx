@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Clock,
   Mic,
+  Settings,
+  Brain,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,18 +47,18 @@ export default function Dashboard() {
       href: "/upload",
     },
     {
-      title: "Choose Language",
-      description: "Select your preferred language",
-      icon: Languages,
-      color: "text-green-500",
-      href: "/languages",
-    },
-    {
-      title: "View Summaries",
+      title: "View Documents",
       description: "Access your AI summaries",
       icon: BookOpen,
       color: "text-purple-500",
       href: "/documents",
+    },
+    {
+      title: "Settings",
+      description: "Language preferences & account",
+      icon: Settings,
+      color: "text-green-500",
+      href: "/settings",
     },
   ];
 
@@ -82,12 +84,12 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8 py-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back! Transform your study materials into your preferred language.
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold">UnderstandAI</h1>
+        <p className="text-lg text-muted-foreground">
+          Transform your study materials into your preferred language
         </p>
       </div>
 
