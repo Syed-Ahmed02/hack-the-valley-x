@@ -52,12 +52,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white/20 backdrop-blur-lg border-r border-white/30 p-6">
-        <div className="mb-8">
-          <h1 className="font-heading text-2xl font-bold text-gray-800">VoiceOver</h1>
-          <p className="text-sm text-gray-600 mt-1">Voice Analysis Platform</p>
-        </div>
+        {/* Sidebar */}
+        <div className="w-64 theme-surface-secondary p-6 border-r border-opacity-30">
+          <div className="mb-8">
+            <h1 className="text-xl font-semibold theme-text-primary">VoiceOver</h1>
+            <p className="text-xs theme-text-tertiary mt-1">Voice Analysis Platform</p>
+          </div>
 
         <nav className="space-y-2">
           {navigationItems.map((item, index) => {
@@ -65,71 +65,73 @@ export default function Dashboard() {
             return (
               <button
                 key={index}
-                className={`sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
                   item.active
-                    ? 'bg-white/40 text-gray-800 font-medium'
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'theme-surface-tertiary theme-text-primary font-medium'
+                    : 'theme-text-secondary hover:theme-text-primary hover:theme-surface-tertiary'
                 }`}
               >
-                <IconComponent className="w-5 h-5" />
-                <span>{item.name}</span>
+                <IconComponent className="w-4 h-4" />
+                <span className="text-sm">{item.name}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
+        {/* Main Content */}
+        <div className="flex-1 p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="font-heading text-3xl font-semibold text-gray-800">Dashboard</h2>
-            <p className="text-gray-600 mt-1">Welcome back! Ready to analyze your voice?</p>
+            <h1 className="text-2xl font-semibold theme-text-primary">Dashboard</h1>
+            <p className="theme-text-secondary text-sm mt-1">Welcome back! Ready to analyze your voice?</p>
           </div>
 
           {/* Profile Section */}
-          <div className="flex items-center gap-4 bg-white/40 backdrop-blur-lg rounded-2xl px-6 py-4 neumorphic">
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold">MJ</span>
-            </div>
-            <div>
-              <p className="font-bold text-foregrounf">Mike Johnson</p>
-              <p className="text-sm text-gray-600">2,450 credits available</p>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 theme-surface-secondary rounded-lg px-3 py-2 border border-opacity-20">
+              <div className="w-8 h-8 theme-accent rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium">MJ</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium theme-text-primary">Mike Johnson</span>
+                <span className="text-xs theme-text-tertiary">2,450 credits</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Voice Input Section */}
         <div className="mb-8">
-          <div className="upload-area rounded-3xl p-12 text-center">
-            <h3 className="font-heading text-2xl font-semibold text-gray-800 mb-8">
+          <div className="theme-surface rounded-xl p-8 border border-opacity-20 shadow-sm">
+            <h2 className="text-lg font-medium theme-text-primary mb-6 text-center">
               Start Voice Recording
-            </h3>
+            </h2>
             <VoiceInput />
           </div>
         </div>
 
         {/* Topic Cards Grid */}
         <div className="mb-8">
-          <h3 className="font-heading text-xl font-semibold text-gray-800 mb-6">Discussion Topics</h3>
+          <h2 className="text-lg font-medium theme-text-primary mb-6">Discussion Topics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {topicCards.map((topic, index) => {
               const IconComponent = topic.icon;
               return (
                 <div
                   key={index}
-                  className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 card-shadow hover:bg-white/80 transition-all duration-300 cursor-pointer group"
+                  className="theme-surface-secondary rounded-lg p-5 hover:theme-surface transition-all duration-200 cursor-pointer group border border-opacity-20 shadow-sm"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="group-hover:scale-110 transition-transform duration-300">
-                      <IconComponent className={`w-8 h-8 ${topic.iconColor}`} />
+                  <div className="flex items-start gap-3">
+                    <div className="group-hover:scale-105 transition-transform duration-200">
+                      <IconComponent className={`w-6 h-6 ${topic.iconColor}`} />
                     </div>
                     <div>
-                      <h4 className="font-heading text-lg font-semibold text-gray-800 mb-2">
+                      <h3 className="font-medium theme-text-primary mb-1 text-sm">
                         {topic.title}
-                      </h4>
-                      <p className="text-gray-600 text-sm leading-relaxed">
+                      </h3>
+                      <p className="theme-text-secondary text-xs leading-relaxed">
                         {topic.description}
                       </p>
                     </div>
@@ -141,16 +143,16 @@ export default function Dashboard() {
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-6 neumorphic">
-          <div className="flex items-center gap-4">
+        <div className="theme-surface-secondary rounded-lg border border-opacity-20 shadow-sm">
+          <div className="flex items-center gap-3 p-4">
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Enter your query, e.g. for communication or chat search"
-                className="w-full bg-transparent border-none outline-none text-gray-800 placeholder-gray-500 text-lg"
+                placeholder="Search for communication or chat topics..."
+                className="w-full bg-transparent border-none outline-none theme-text-primary placeholder-theme-text-tertiary text-sm"
               />
             </div>
-            <button className="bg-gradient-to-r from-pink-400 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+            <button className="theme-accent px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
               Search
             </button>
           </div>
