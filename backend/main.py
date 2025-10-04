@@ -54,10 +54,10 @@ def get_gemini_response(prompt: str) -> str:
         contents=prompt,
 
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=0) # Disables thinking
+            thinking_config=types.ThinkingConfig(thinking_budget=0) 
         ),
     )
-    print(response.text)
+    
     return response.text
 
 
