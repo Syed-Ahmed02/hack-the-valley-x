@@ -13,7 +13,7 @@ export default function HomePage() {
           href: "#features"
         }
       }}
-      title="UnderstandAI"
+      title="Lingo Lift"
       description="Break down language barriers in education. Upload lecture notes, PDFs, or recorded lectures and get AI-powered summaries and translations in your preferred language—making learning accessible for international students everywhere."
       actions={[
         {
