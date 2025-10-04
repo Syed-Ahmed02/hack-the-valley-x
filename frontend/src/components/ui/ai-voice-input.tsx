@@ -88,7 +88,7 @@ export function AIVoiceInput({
             "group w-16 h-16 rounded-xl flex items-center justify-center transition-colors shadow-lg",
             submitted
               ? "bg-red-500 hover:bg-red-600 text-white"
-              : "theme-accent hover:theme-accent-hover text-white"
+              : "bg-blue-500 hover:bg-blue-600 text-white"
           )}
           type="button"
           onClick={handleClick}
@@ -99,7 +99,7 @@ export function AIVoiceInput({
               style={{ animationDuration: "3s" }}
             />
           ) : (
-            <Mic className="w-6 h-6" />
+            <Mic className="w-6 h-6 text-white" />
           )}
         </button>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { VoiceInput } from "@/components/voice-input";
+import { GooeySearchBar } from "@/components/ui/animated-search-bar";
 import {
   Mic,
   MessageCircle,
@@ -112,6 +113,20 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Animated Search Bar */}
+        <div className="mb-8">
+          <div className="flex justify-center items-center p-4">
+            <div className="w-full max-w-lg">
+              <h2 className="text-lg font-medium theme-text-primary mb-4 text-center">
+                Search Topics
+              </h2>
+              <div className="flex justify-center">
+                <GooeySearchBar />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Topic Cards Grid */}
         <div className="mb-8">
           <h2 className="text-lg font-medium theme-text-primary mb-6">Discussion Topics</h2>
@@ -142,21 +157,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="theme-surface-secondary rounded-lg border border-opacity-20 shadow-sm">
-          <div className="flex items-center gap-3 p-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search for communication or chat topics..."
-                className="w-full bg-transparent border-none outline-none theme-text-primary placeholder-theme-text-tertiary text-sm"
-              />
-            </div>
-            <button className="theme-accent px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-              Search
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
