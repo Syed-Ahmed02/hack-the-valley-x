@@ -1,37 +1,53 @@
 "use client";
 
 import { VoiceInput } from "@/components/voice-input";
+import {
+  Mic,
+  MessageCircle,
+  BarChart3,
+  Settings,
+  HelpCircle,
+  LogOut,
+  Brain,
+  Volume2,
+  Wrench,
+  Heart
+} from "lucide-react";
 
 export default function Dashboard() {
   const topicCards = [
     {
       title: "Recent Advances in Speech Recognition Technologies",
       description: "Explore cutting-edge developments in AI-powered speech recognition systems and their applications.",
-      icon: "🎤"
+      icon: Brain,
+      iconColor: "text-blue-500"
     },
     {
       title: "Enhancing Articulation and Intonation in Speech",
       description: "Learn techniques to improve clarity, pronunciation, and vocal expression for better communication.",
-      icon: "🗣️"
+      icon: Volume2,
+      iconColor: "text-green-500"
     },
     {
       title: "Exploring Speech Enhancement Tools and Techniques",
       description: "Discover advanced tools and methods for improving audio quality and speech intelligibility.",
-      icon: "🔧"
+      icon: Wrench,
+      iconColor: "text-orange-500"
     },
     {
       title: "Impact of Emotions and Intonation on Effective Communication",
       description: "Understand how emotional context and vocal patterns influence message delivery and reception.",
-      icon: "💭"
+      icon: Heart,
+      iconColor: "text-pink-500"
     }
   ];
 
   const navigationItems = [
-    { name: "Chats", icon: "💬", active: true },
-    { name: "Reports", icon: "📊", active: false },
-    { name: "Settings", icon: "⚙️", active: false },
-    { name: "Support & Guide", icon: "❓", active: false },
-    { name: "Logout", icon: "🚪", active: false }
+    { name: "Chats", icon: MessageCircle, active: true },
+    { name: "Reports", icon: BarChart3, active: false },
+    { name: "Settings", icon: Settings, active: false },
+    { name: "Support & Guide", icon: HelpCircle, active: false },
+    { name: "Logout", icon: LogOut, active: false }
   ];
 
   return (
@@ -44,19 +60,22 @@ export default function Dashboard() {
         </div>
 
         <nav className="space-y-2">
-          {navigationItems.map((item, index) => (
-            <button
-              key={index}
-              className={`sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left ${
-                item.active
-                  ? 'bg-white/40 text-gray-800 font-medium'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span>{item.name}</span>
-            </button>
-          ))}
+          {navigationItems.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <button
+                key={index}
+                className={`sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left ${
+                  item.active
+                    ? 'bg-white/40 text-gray-800 font-medium'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                <IconComponent className="w-5 h-5" />
+                <span>{item.name}</span>
+              </button>
+            );
+          })}
         </nav>
       </div>
 
@@ -95,26 +114,29 @@ export default function Dashboard() {
         <div className="mb-8">
           <h3 className="font-heading text-xl font-semibold text-gray-800 mb-6">Discussion Topics</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {topicCards.map((topic, index) => (
-              <div
-                key={index}
-                className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 card-shadow hover:bg-white/80 transition-all duration-300 cursor-pointer group"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="text-3xl group-hover:scale-110 transition-transform duration-300">
-                    {topic.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-heading text-lg font-semibold text-gray-800 mb-2">
-                      {topic.title}
-                    </h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {topic.description}
-                    </p>
+            {topicCards.map((topic, index) => {
+              const IconComponent = topic.icon;
+              return (
+                <div
+                  key={index}
+                  className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 card-shadow hover:bg-white/80 transition-all duration-300 cursor-pointer group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="group-hover:scale-110 transition-transform duration-300">
+                      <IconComponent className={`w-8 h-8 ${topic.iconColor}`} />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-lg font-semibold text-gray-800 mb-2">
+                        {topic.title}
+                      </h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {topic.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
