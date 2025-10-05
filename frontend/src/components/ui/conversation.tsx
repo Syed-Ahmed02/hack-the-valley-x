@@ -2,6 +2,14 @@
 
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { useCallback, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Play, Pause, Square, Volume2, Languages } from 'lucide-react';
 
 export function Conversation() {
   const [text, setText] = useState('');
@@ -121,92 +129,131 @@ export function Conversation() {
   }, [audioUrl]);
 
   return (
-    <div className="flex flex-col items-center gap-6 p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-center">Text to Speech Converter</h2>
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
+          <Volume2 className="h-6 w-6 text-primary" />
+          Text to Speech Converter
+        </h2>
+        <p className="text-muted-foreground">
+          Convert any text to speech in multiple languages
+        </p>
+      </div>
       
-      <div className="w-full space-y-4">
-        <div>
-          <label htmlFor="language-select" className="block text-sm font-medium mb-2">
-            Select Language:
-          </label>
-          <select
-            id="language-select"
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
-          >
-            {languageOptions.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
+      <div className="space-y-6">
+        {/* Language Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="language-select" className="flex items-center gap-2">
+            <Languages className="h-4 w-4" />
+            Select Language
+          </Label>
+          <Select value={selectedLanguage} onValueChange={setSelectedLanguage} disabled={isLoading}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a language" />
+            </SelectTrigger>
+            <SelectContent>
+              {languageOptions.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div>
-          <label htmlFor="text-input" className="block text-sm font-medium mb-2">
-            Enter text to convert to speech:
-          </label>
-          <textarea
+        {/* Text Input */}
+        <div className="space-y-2">
+          <Label htmlFor="text-input">
+            Enter text to convert to speech
+          </Label>
+          <Textarea
             id="text-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Type your text here..."
-            className="w-full p-3 border border-gray-300 rounded-lg resize-none h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-h-[120px] resize-none"
             disabled={isLoading}
           />
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <button
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Button
             onClick={convertTextToSpeech}
             disabled={isLoading || !text.trim()}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2"
           >
-            {isLoading ? 'Converting...' : 'Convert to Speech'}
-          </button>
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Converting...
+              </>
+            ) : (
+              <>
+                <Volume2 className="h-4 w-4" />
+                Convert to Speech
+              </>
+            )}
+          </Button>
           
           {audioUrl && (
             <>
-              <button
+              <Button
                 onClick={playAudio}
                 disabled={isPlaying}
-                className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                variant="secondary"
+                className="flex items-center gap-2"
               >
-                {isPlaying ? 'Playing...' : 'Play Audio'}
-              </button>
-              <button
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-4 w-4" />
+                    Playing...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Play Audio
+                  </>
+                )}
+              </Button>
+              <Button
                 onClick={clearAudio}
-                className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                variant="outline"
+                className="flex items-center gap-2"
               >
+                <Square className="h-4 w-4" />
                 Clear
-              </button>
+              </Button>
             </>
           )}
         </div>
 
+        {/* Audio Player */}
         {audioUrl && (
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">Audio generated successfully!</p>
-            <audio 
-              controls 
-              className="w-full max-w-md"
-              onPlay={() => setIsPlaying(true)}
-              onEnded={() => setIsPlaying(false)}
-              onPause={() => setIsPlaying(false)}
-            >
-              <source src={audioUrl} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">Audio generated successfully!</p>
+                <audio 
+                  controls 
+                  className="w-full max-w-md"
+                  onPlay={() => setIsPlaying(true)}
+                  onEnded={() => setIsPlaying(false)}
+                  onPause={() => setIsPlaying(false)}
+                >
+                  <source src={audioUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Status Display */}
+        {/* Loading Status */}
         {isLoading && (
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 text-blue-600">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
               <span className="text-sm font-medium">Converting text to speech...</span>
             </div>
           </div>

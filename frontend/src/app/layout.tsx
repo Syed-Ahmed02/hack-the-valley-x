@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "VoiceOver - Voice Analysis Dashboard",
+  title: "Lingo Lift",
   description: "Voice and audio analysis platform for speech enhancement and communication insights",
 };
 

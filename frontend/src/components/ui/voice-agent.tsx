@@ -1,9 +1,12 @@
 'use client';
 
 import { useCallback, useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, Phone, PhoneOff } from 'lucide-react';
+import { Mic, MicOff, Volume2, Phone, PhoneOff, MessageSquare, Settings, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-// Mock implementation for development - replace with actual @elevenlabs/react import when package is installed
 import { useConversation } from '@elevenlabs/react';
 
 
@@ -106,24 +109,31 @@ export function VoiceAgent() {
   }, [textInput, sendTextMessage]);
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto space-y-6">
-    
-      
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+     
 
       {/* Agent Configuration */}
-      <div className="">
-        <div className="space-y-3">
-          
-          
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            Interactive Voice Agent Tutor
+          </CardTitle>
+          <CardDescription>
+            Have real-time voice conversations with an AI agent that helps you with your English
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           {!isConnected && (
-            <button
+            <Button
               onClick={startConversation}
               disabled={isConnecting || !agentId.trim()}
-              className="w-full px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full flex items-center gap-2"
+              size="lg"
             >
               {isConnecting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Connecting...
                 </>
               ) : (
@@ -132,99 +142,113 @@ export function VoiceAgent() {
                   Start Voice Conversation
                 </>
               )}
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Connection Status */}
       {isConnected && (
-        <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-700 font-medium">Connected to Voice Agent</span>
-          </div>
-          <button
-            onClick={endConversation}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            <PhoneOff className="h-4 w-4" />
-            End Call
-          </button>
-        </div>
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-green-700 font-medium">Connected to Voice Agent</span>
+              </div>
+              <Button
+                onClick={endConversation}
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-2 bg-red-500 text-white"
+              >
+                <PhoneOff className="h-4 w-4" />
+                End Call
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Voice Controls */}
       {isConnected && (
-        <div className="flex items-center justify-center gap-4 p-4 bg-white border rounded-lg">
-          <button
-            onClick={toggleMic}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              micMuted 
-                ? 'bg-red-500 text-white hover:bg-red-600' 
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            {micMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            {micMuted ? 'Unmute' : 'Mute'}
-          </button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Voice Controls</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Button
+                onClick={toggleMic}
+                variant={micMuted ? "destructive" : "default"}
+                className="flex items-center gap-2"
+              >
+                {micMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                {micMuted ? 'Unmute' : 'Mute'}
+              </Button>
 
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-4 w-4 text-gray-600" />
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="w-20"
-            />
-            <span className="text-sm text-gray-600 w-8">
-              {Math.round(volume * 100)}%
-            </span>
-          </div>
+              <div className="flex items-center gap-2">
+                <Volume2 className="h-4 w-4 text-muted-foreground" />
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={volume}
+                  onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                  className="w-20"
+                />
+                <span className="text-sm text-muted-foreground w-8">
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <div className={`w-2 h-2 rounded-full ${
-              conversation.isSpeaking ? 'bg-blue-500 animate-pulse' : 'bg-gray-400'
-            }`}></div>
-            {conversation.isSpeaking ? 'Agent Speaking' : 'Listening'}
-          </div>
-        </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className={`w-2 h-2 rounded-full ${
+                  conversation.isSpeaking ? 'bg-primary animate-pulse' : 'bg-muted-foreground'
+                }`} />
+                {conversation.isSpeaking ? 'Agent Speaking' : 'Listening'}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
 
       {/* Text Input for Fallback */}
       {isConnected && (
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Type a message or speak..."
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleTextSubmit();
-                }
-              }}
-            />
-            <button
-              onClick={handleTextSubmit}
-              disabled={!textInput.trim()}
-              className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              Send
-            </button>
-          </div>
-
-          
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Text Input</CardTitle>
+            <CardDescription>
+              Type a message as an alternative to voice input
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Type a message or speak..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleTextSubmit();
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleTextSubmit}
+                disabled={!textInput.trim()}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Send
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
-    
     </div>
   );
 }
