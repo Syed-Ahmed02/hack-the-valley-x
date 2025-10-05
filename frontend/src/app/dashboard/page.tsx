@@ -2,6 +2,9 @@
 
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
 import { VoiceInput } from "@/components/voice-input";
+import { Conversation } from "@/components/ui/conversation";
+import { EnglishTutor } from "@/components/ui/english-tutor";
+import { VoiceAgent } from "@/components/ui/voice-agent";
 import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 import {
@@ -266,53 +269,44 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Text-to-Speech Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-brand" />
+            Text-to-Speech Converter
+          </CardTitle>
+          <CardDescription>
+            Convert any text to speech in multiple languages
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Conversation />
+        </CardContent>
+      </Card>
+
+      
+
+      {/* Interactive Voice Agent Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-brand" />
+            Interactive Voice Agent
+          </CardTitle>
+          <CardDescription>
+            Have real-time voice conversations with an AI agent
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <VoiceAgent />
+        </CardContent>
+      </Card>
+
     
 
       {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {quickActions.map((action, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <action.icon className={`h-8 w-8 ${action.color} mb-2`} />
-                <CardTitle className="text-base">{action.title}</CardTitle>
-                <CardDescription>{action.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <a href={action.href}>Get Started</a>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Documents */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Documents</h2>
-        <div className="space-y-3">
-          {recentDocuments.map((doc, index) => (
-            <Card key={index} className="hover:bg-accent/50 transition-colors cursor-pointer">
-              <CardHeader className="flex flex-row items-center gap-4 py-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10">
-                  <doc.icon className="h-5 w-5 text-brand" />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-sm">{doc.title}</CardTitle>
-                  <CardDescription className="text-xs">
-                    {doc.description} • {doc.language}
-                  </CardDescription>
-                </div>
-                <Button variant="ghost" size="sm">
-                  View
-                </Button>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
+      
       </div>
 
     </div>
