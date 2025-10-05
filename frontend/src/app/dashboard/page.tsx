@@ -1,7 +1,8 @@
 "use client";
 
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
-import RealtimeTranslationSession from "@/components/RealtimeTranslationSession";
+import { VoiceInput } from "@/components/voice-input";
+import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 import {
   FileText,
@@ -132,7 +133,26 @@ Supervised learning uses labeled training data to build predictive models:
 };
 
 export default function Dashboard() {
-  const { auth0User, isLoading } = useUser();
+  // Get authenticated user
+  const { auth0User } = useUser();
+  
+  // State management
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('Spanish');
+
+  // Text content
+  const originalText = "Welcome to today's lecture on machine learning fundamentals. We'll be covering supervised learning algorithms, including linear regression, decision trees, and neural networks. These concepts form the foundation of modern artificial intelligence and are essential for understanding how machines can learn from data to make predictions and classifications.";
+
+  const translatedTexts = {
+    Spanish: "Bienvenidos a la conferencia de hoy sobre fundamentos de aprendizaje automático. Cubriremos algoritmos de aprendizaje supervisado, incluyendo regresión lineal, árboles de decisión y redes neuronales. Estos conceptos forman la base de la inteligencia artificial moderna y son esenciales para entender cómo las máquinas pueden aprender de los datos para hacer predicciones y clasificaciones.",
+    French: "Bienvenue à la conférence d'aujourd'hui sur les fondamentaux de l'apprentissage automatique. Nous couvrirons les algorithmes d'apprentissage supervisé, y compris la régression linéaire, les arbres de décision et les réseaux de neurones. Ces concepts forment la base de l'intelligence artificielle moderne et sont essentiels pour comprendre comment les machines peuvent apprendre à partir de données pour faire des prédictions et des classifications.",
+    German: "Willkommen zur heutigen Vorlesung über die Grundlagen des maschinellen Lernens. Wir werden überwachte Lernalgorithmen behandeln, einschließlich linearer Regression, Entscheidungsbäumen und neuronalen Netzwerken. Diese Konzepte bilden die Grundlage der modernen künstlichen Intelligenz und sind wesentlich, um zu verstehen, wie Maschinen aus Daten lernen können, um Vorhersagen und Klassifikationen zu treffen.",
+    Hindi: "मशीन लर्निंग के मूल सिद्धांतों पर आज के व्याख्यान में आपका स्वागत है। हम सुपरवाइज्ड लर्निंग एल्गोरिदम को कवर करेंगे, जिसमें लीनियर रिग्रेशन, डिसीजन ट्रीज़ और न्यूरल नेटवर्क शामिल हैं। ये अवधारणाएं आधुनिक कृत्रिम बुद्धिमत्ता की नींव बनती हैं और यह समझने के लिए आवश्यक हैं कि मशीनें कैसे डेटा से सीखकर भविष्यवाणियां और वर्गीकरण कर सकती हैं।"
+  };
+
+  const availableLanguages = ['Spanish', 'French', 'German', 'Hindi'];
+
   const recentDocuments = [
     {
       title: "Lecture Notes - Computer Science 101",
@@ -199,21 +219,13 @@ export default function Dashboard() {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="relative flex h-screen">
       {/* Main Content */}
-      <div className={`flex-1 space-y-8 py-8 transition-all duration-300 ${showSummaryPanel ? 'pr-96' : ''}`}>
+      <div className="flex-1 space-y-8 py-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">Lingo Lift Dashboard</h1>
+        <h1 className="text-4xl font-bold">UnderstandAI</h1>
         <p className="text-lg text-muted-foreground">
           Transform your study materials into your preferred language
         </p>
@@ -238,28 +250,23 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Real-Time Translation Section */}
-      {auth0User && (
-        <div>
-          <RealtimeTranslationSession userId={auth0User.sub!} />
-        </div>
-      )}
-
-      {/* Search Section */}
+      {/* Voice Input Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-brand" />
-            Quick Search
+            <Mic className="h-5 w-5 text-brand" />
+            Record Audio Lecture
           </CardTitle>
           <CardDescription>
-            Search through your uploaded documents and summaries
+            Record or upload audio lectures to transcribe and translate
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <GooeySearchBar />
+          <VoiceInput userId={auth0User?.sub} />
         </CardContent>
       </Card>
+
+    
 
       {/* Quick Actions */}
       <div>
@@ -308,69 +315,6 @@ export default function Dashboard() {
       </div>
       </div>
 
-      {/* AI Summary Panel */}
-      {showSummaryPanel && (
-        <div className="fixed right-0 top-0 h-full w-96 bg-background border-l shadow-lg z-50 flex flex-col">
-          {/* Panel Header */}
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-brand" />
-                  AI Summary
-                </h2>
-                <p className="text-sm text-muted-foreground">Generated notes for your lecture</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSummaryPanel(false)}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Difficulty Toggle */}
-          <div className="p-4 border-b">
-            <label className="text-sm font-medium mb-3 block">Summary Level</label>
-            <div className="flex rounded-lg bg-muted p-1">
-              {(['beginner', 'intermediate', 'advanced'] as DifficultyLevel[]).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setDifficultyLevel(level)}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                    difficultyLevel === level
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {level.charAt(0).toUpperCase() + level.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Summary Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
-                {getSummaryContent(difficultyLevel)}
-              </pre>
-            </div>
-          </div>
-
-          {/* Panel Footer */}
-          <div className="p-4 border-t">
-            <Button className="w-full" variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Save Summary
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
