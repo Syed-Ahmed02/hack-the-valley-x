@@ -27,25 +27,72 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { SettingsPanel } from "@/components/settings-panel";
+import { useUser } from "@/hooks/useUser";
+
+interface Session {
+  id: string;
+  title: string;
+  target_language: string;
+  created_at: string;
+  ended_at?: string;
+  preview_text?: string;
+}
 
 export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const { auth0User } = useUser();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Recent documents/sessions
-  const recentItems = [
-    { title: "Computer Science Notes", time: "2 hours ago" },
-    { title: "Biology Chapter 5", time: "Yesterday" },
-    { title: "Math Formulas", time: "2 days ago" },
-    { title: "Physics Lecture", time: "3 days ago" },
-    { title: "Chemistry Lab Report", time: "1 week ago" },
-  ];
+  // Fetch recent sessions when user is available
+  useEffect(() => {
+    if (auth0User) {
+      fetchRecentSessions();
+    }
+  }, [auth0User]);
+
+  const fetchRecentSessions = async () => {
+    setIsLoadingSessions(true);
+    try {
+      const response = await fetch('/api/sessions');
+      if (response.ok) {
+        const data = await response.json();
+        setRecentSessions(data.sessions || []);
+      } else {
+        console.error('Failed to fetch sessions');
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  };
+
+  // Format time ago
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  };
+
+  // Get display text - first 10 characters of transcription or title
+  const getDisplayText = (session: Session) => {
+    const textToShow = session.preview_text || session.title;
+    return textToShow.length > 10 ? textToShow.substring(0, 10) + '...' : textToShow;
+  };
 
   // Function to highlight matching text
   const highlightText = (text: string, query: string) => {
@@ -65,10 +112,11 @@ export function AppSidebar() {
     );
   };
 
-  // Filter items based on search query
-  const filteredItems = recentItems.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter sessions based on search query
+  const filteredSessions = recentSessions.filter(session => {
+    const searchText = (session.preview_text || session.title).toLowerCase();
+    return searchText.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <Sidebar className={`border-r transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
@@ -76,7 +124,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Button className="flex-1 justify-start gap-2" size="default">
             <Plus className="h-4 w-4" />
-            {!isCollapsed && "New Session"}
+            {!isCollapsed && "View your Previous Sessions"}
           </Button>
           <Button
             variant="ghost"
@@ -95,28 +143,7 @@ export function AppSidebar() {
 
       {!isCollapsed && (
         <SidebarContent className="px-2">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="/upload">
-                      <Upload className="h-4 w-4" />
-                      <span>Upload Materials</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="/documents">
-                      <FileText className="h-4 w-4" />
-                      <span>My Documents</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+         
 
         <SidebarGroup className="mt-4">
           {/* Search Input */}
@@ -137,24 +164,44 @@ export function AppSidebar() {
           </div>
             <SidebarGroupContent>
               <SidebarMenu>
-                {filteredItems.map((item, index) => (
-                  <SidebarMenuItem key={index}>
-                    <SidebarMenuButton asChild className="h-auto py-2">
-                      <a href="#" className="flex flex-col items-start gap-1">
-                        <div className="flex items-center gap-2 w-full">
-                          <MessageSquare className="h-4 w-4 shrink-0" />
-                          <span className="truncate text-sm">
-                            {highlightText(item.title, searchQuery)}
+                {isLoadingSessions ? (
+                  <div className="px-3 py-2 text-xs text-muted-foreground text-center">
+                    Loading sessions...
+                  </div>
+                ) : filteredSessions.length > 0 ? (
+                  filteredSessions.map((session) => (
+                    <SidebarMenuItem key={session.id}>
+                      <SidebarMenuButton 
+                        className="h-auto py-2 cursor-pointer hover:bg-sidebar-accent"
+                        onClick={() => {
+                          // Emit custom event to dashboard
+                          const event = new CustomEvent('sessionSelect', {
+                            detail: { sessionId: session.id }
+                          });
+                          window.dispatchEvent(event);
+                        }}
+                      >
+                        <div className="flex flex-col items-start gap-1 w-full">
+                          <div className="flex items-center gap-2 w-full">
+                            <MessageSquare className="h-4 w-4 shrink-0" />
+                            <span className="truncate text-sm">
+                              {highlightText(getDisplayText(session), searchQuery)}
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground pl-6">
+                            {formatTimeAgo(session.created_at)}
                           </span>
                         </div>
-                        <span className="text-xs text-muted-foreground pl-6">{item.time}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-                {filteredItems.length === 0 && searchQuery && (
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                ) : searchQuery ? (
                   <div className="px-3 py-2 text-xs text-muted-foreground text-center">
-                    No items found for "{searchQuery}"
+                    No sessions found for "{searchQuery}"
+                  </div>
+                ) : (
+                  <div className="px-3 py-2 text-xs text-muted-foreground text-center">
+                    No recent sessions
                   </div>
                 )}
               </SidebarMenu>
@@ -183,11 +230,13 @@ export function AppSidebar() {
 
           <div className="flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-sidebar-accent cursor-pointer mt-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium shrink-0">
-              MJ
+              {auth0User?.name ? auth0User.name.charAt(0).toUpperCase() : auth0User?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Mike Johnson</p>
-              <p className="text-xs text-muted-foreground">2,450 credits</p>
+              <p className="text-sm font-medium truncate">
+                {auth0User?.name || auth0User?.email || 'User'}
+              </p>
+              <p className="text-xs text-muted-foreground">{auth0User?.email}</p>
             </div>
           </div>
         </SidebarFooter>
