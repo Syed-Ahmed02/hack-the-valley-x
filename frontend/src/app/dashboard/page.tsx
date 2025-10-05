@@ -2,7 +2,7 @@
 
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
 import { VoiceInput } from "@/components/voice-input";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FileText,
   Languages,
@@ -18,9 +18,13 @@ import {
   X,
   ChevronLeft,
   Globe,
+  FileAudio,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SettingsPanel } from "@/components/settings-panel";
 
 // Typing effect component for chatbot-like display
 function TypingText({
@@ -138,6 +142,11 @@ export default function Dashboard() {
   const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevel>('intermediate');
   const [isTranslated, setIsTranslated] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('Spanish');
+  const [transcribedText, setTranscribedText] = useState<string>("");
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);
+  const [uploadedName, setUploadedName] = useState<string>("");
+  const [uploadedDuration, setUploadedDuration] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Text content
   const originalText = "Welcome to today's lecture on machine learning fundamentals. We'll be covering supervised learning algorithms, including linear regression, decision trees, and neural networks. These concepts form the foundation of modern artificial intelligence and are essential for understanding how machines can learn from data to make predictions and classifications.";
@@ -150,6 +159,44 @@ export default function Dashboard() {
   };
 
   const availableLanguages = ['Spanish', 'French', 'German', 'Hindi'];
+
+  // Initialize transcribed text with default content
+  useEffect(() => {
+    if (!transcribedText) {
+      setTranscribedText(originalText);
+    }
+  }, [transcribedText]);
+
+  // Handle audio file upload to backend for transcription
+  const handleAudioUpload = async (file: File) => {
+    try {
+      // Compute duration client-side using Web Audio API
+      const arrayBuffer = await file.arrayBuffer();
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+      const durationSec = Math.round(audioBuffer.duration);
+      const mins = Math.floor(durationSec / 60);
+      const secs = String(durationSec % 60).padStart(2, '0');
+      const durationLabel = `${mins}:${secs}`;
+
+      const placeholder = `Uploaded: "${file.name}" (~${durationLabel}).\n\nTranscription is not available without a server. This is a placeholder preview.`;
+
+      setIsUploaded(true);
+      setIsTranslated(false);
+      setTypingComplete(false);
+      setTranscribedText(placeholder);
+      setUploadedName(file.name);
+      setUploadedDuration(durationLabel);
+    } catch (e) {
+      console.error(e);
+      setIsUploaded(true);
+      setIsTranslated(false);
+      setTypingComplete(false);
+      setTranscribedText(`Uploaded: "${file.name}". Transcription unavailable offline.`);
+      setUploadedName(file.name);
+      setUploadedDuration("");
+    }
+  };
 
   const recentDocuments = [
     {
@@ -218,34 +265,15 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="relative flex h-screen">
+    <div className="relative flex min-h-screen">
       {/* Main Content */}
-      <div className={`flex-1 space-y-8 py-8 transition-all duration-300 ${showSummaryPanel ? 'pr-96' : ''}`}>
+      <div className={`flex-1 space-y-8 pt-8 pb-28 transition-all duration-300 ${showSummaryPanel ? 'pr-96' : ''}`}>
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">UnderstandAI</h1>
+        <h1 className="text-4xl font-bold text-blue-600">Lingo Lift</h1>
         <p className="text-lg text-muted-foreground">
           Transform your study materials into your preferred language
         </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                {stat.change} from last month
-              </p>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       {/* Voice Input Section */}
@@ -261,6 +289,64 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <VoiceInput />
+          <div className="mt-4">
+            <Dialog>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="glow"
+                        size="sm"
+                        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl"
+                      >
+                        <FileAudio className="h-4 w-4" />
+                        Upload audio
+                      </Button>
+                    </DialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Select MP3/WAV/M4A from your device</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload audio</DialogTitle>
+                  <DialogDescription>Client-side only. MP3/WAV/M4A supported.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div
+                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <FileAudio className="h-6 w-6 text-brand" />
+                      <p className="text-sm">Drag and drop audio here, or</p>
+                      <Button size="sm">Choose file</Button>
+                      <p className="text-xs text-muted-foreground">MP3, WAV, or M4A</p>
+                    </div>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAudioUpload(file);
+                    }}
+                    className="hidden"
+                  />
+                  {uploadedName && (
+                    <div className="text-sm text-muted-foreground">
+                      Selected: <span className="text-foreground font-medium">{uploadedName}</span>
+                      {uploadedDuration ? ` • ${uploadedDuration}` : ''}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
 
@@ -283,6 +369,7 @@ export default function Dashboard() {
                 value={selectedLanguage}
                 onChange={(e) => setSelectedLanguage(e.target.value)}
                 className="text-sm border rounded px-2 py-1 bg-background"
+                disabled={isUploaded}
               >
                 {availableLanguages.map((lang) => (
                   <option key={lang} value={lang}>{lang}</option>
@@ -293,6 +380,7 @@ export default function Dashboard() {
                 size="sm"
                 onClick={() => setIsTranslated(!isTranslated)}
                 className="flex items-center gap-2"
+                disabled={isUploaded}
               >
                 <Globe className="h-4 w-4" />
                 {isTranslated ? 'Original' : 'Translate'}
@@ -302,7 +390,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <TypingText
-            text={isTranslated ? translatedTexts[selectedLanguage as keyof typeof translatedTexts] : originalText}
+            text={isTranslated ? translatedTexts[selectedLanguage as keyof typeof translatedTexts] : transcribedText}
             speed={25}
             onComplete={() => setTypingComplete(true)}
           />
@@ -322,67 +410,124 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Search Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-brand" />
-            Quick Search
-          </CardTitle>
-          <CardDescription>
-            Search through your uploaded documents and summaries
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <GooeySearchBar />
-        </CardContent>
-      </Card>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {stats.map((stat, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                {stat.change} from last month
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Quick Actions */}
+
+
+      {/* Quick Actions (open dialogs) */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {quickActions.map((action, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+        <div className="grid gap-4 md:grid-cols-3 items-stretch">
+          {/* Upload Document Dialog */}
+          <Dialog>
+            <Card className="hover:shadow-lg dark:hover:shadow-lg hover:bg-accent/50 dark:hover:bg-accent/50 transition-shadow cursor-pointer h-full flex flex-col">
               <CardHeader>
-                <action.icon className={`h-8 w-8 ${action.color} mb-2`} />
-                <CardTitle className="text-base">{action.title}</CardTitle>
-                <CardDescription>{action.description}</CardDescription>
+                <FileText className={`h-8 w-8 text-blue-500 mb-2`} />
+                <CardTitle className="text-base">Upload Document</CardTitle>
+                <CardDescription>Upload PDFs, notes, or images</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <a href={action.href}>Get Started</a>
-                </Button>
+              <CardContent className="mt-auto">
+                <DialogTrigger asChild>
+                  <Button className="w-full">Get Started</Button>
+                </DialogTrigger>
               </CardContent>
             </Card>
-          ))}
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upload document</DialogTitle>
+                <DialogDescription>Client-side only. Choose a file to preview.</DialogDescription>
+              </DialogHeader>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                <p className="text-sm mb-2">Drag and drop here, or</p>
+                <Button size="sm">Choose file</Button>
+                <p className="text-xs text-muted-foreground mt-2">PDF, images supported (placeholder)</p>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* View Documents Dialog (Recent Documents moved here) */}
+          <Dialog>
+            <Card className="hover:shadow-lg dark:hover:shadow-lg hover:bg-accent/50 dark:hover:bg-accent/50 transition-shadow cursor-pointer h-full flex flex-col">
+              <CardHeader>
+                <BookOpen className={`h-8 w-8 text-purple-500 mb-2`} />
+                <CardTitle className="text-base">View Documents</CardTitle>
+                <CardDescription>Access your AI summaries</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <DialogTrigger asChild>
+                  <Button className="w-full">Open</Button>
+                </DialogTrigger>
+              </CardContent>
+            </Card>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Recent Documents</DialogTitle>
+                <DialogDescription>Your latest items</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                {recentDocuments.map((doc, index) => (
+                  <Card key={index} className="hover:bg-accent/50 transition-colors cursor-pointer">
+                    <CardHeader className="flex flex-row items-center gap-4 py-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10">
+                        <doc.icon className="h-5 w-5 text-brand" />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-sm">{doc.title}</CardTitle>
+                        <CardDescription className="text-xs">
+                          {doc.description} • {doc.language}
+                        </CardDescription>
+                      </div>
+                      <Button variant="ghost" size="sm">View</Button>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Settings Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="hover:shadow-lg dark:hover:shadow-lg hover:bg-accent/50 dark:hover:bg-accent/50 transition-shadow cursor-pointer h-full flex flex-col">
+                <CardHeader>
+                  <Settings className={`h-8 w-8 text-green-500 mb-2`} />
+                  <CardTitle className="text-base">Settings</CardTitle>
+                  <CardDescription>Language preferences & account</CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto">
+                  <Button className="w-full" type="button">Open</Button>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Settings</DialogTitle>
+                <DialogDescription>Configure your preferences</DialogDescription>
+              </DialogHeader>
+              <SettingsPanel />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
-      {/* Recent Documents */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Documents</h2>
-        <div className="space-y-3">
-          {recentDocuments.map((doc, index) => (
-            <Card key={index} className="hover:bg-accent/50 transition-colors cursor-pointer">
-              <CardHeader className="flex flex-row items-center gap-4 py-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10">
-                  <doc.icon className="h-5 w-5 text-brand" />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-sm">{doc.title}</CardTitle>
-                  <CardDescription className="text-xs">
-                    {doc.description} • {doc.language}
-                  </CardDescription>
-                </div>
-                <Button variant="ghost" size="sm">
-                  View
-                </Button>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
+      {/* Recent Documents moved to dialog under "View Documents" */}
       </div>
 
       {/* AI Summary Panel */}

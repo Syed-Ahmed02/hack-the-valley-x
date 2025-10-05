@@ -57,7 +57,7 @@ export function SettingsPanel() {
             Settings
           </DialogTitle>
           <DialogDescription>
-            Customize your UnderstandAI experience
+            Customize your Lingo Lift experience
           </DialogDescription>
         </DialogHeader>
 
