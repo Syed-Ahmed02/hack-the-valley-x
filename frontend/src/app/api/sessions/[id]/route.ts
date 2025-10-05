@@ -4,10 +4,11 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log(`GET /api/sessions/${params.id} called`);
+    const { id } = await params;
+    console.log(`GET /api/sessions/${id} called`);
     
     // Get the current session from Auth0
     let session;
@@ -40,7 +41,7 @@ export async function GET(
     }
 
     const auth0Id = session.user.sub;
-    const sessionId = params.id;
+    const sessionId = id;
     
     console.log('Fetching session details for:', { sessionId, auth0Id });
 

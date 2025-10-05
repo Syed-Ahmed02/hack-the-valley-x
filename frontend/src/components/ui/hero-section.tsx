@@ -41,8 +41,10 @@ export function HeroSection({
   actions,
   image,
 }: HeroProps) {
-  // Use the light image for now to avoid theme issues
-  const imageSrc = image.light;
+  const { theme, resolvedTheme } = useTheme();
+  // Use resolvedTheme for more reliable theme detection
+  const isDark = resolvedTheme === "dark" || theme === "light";
+  const imageSrc = isDark ? image.dark : image.light;
 
   return (
     <section
@@ -117,9 +119,17 @@ export function HeroSection({
                 <Image
                   src={imageSrc}
                   alt={image.alt}
-                  width={1248}
-                  height={765}
+                  width={800}
+                  height={600}
                   priority
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    console.error('Image failed to load:', imageSrc);
+                    // Fallback to light image if dark fails
+                    if (imageSrc === image.dark) {
+                      e.currentTarget.src = image.light;
+                    }
+                  }}
                 />
               </Mockup>
             </MockupFrame>
