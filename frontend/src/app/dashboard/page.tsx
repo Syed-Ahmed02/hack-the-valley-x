@@ -3,6 +3,7 @@
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
 import { VoiceInput } from "@/components/voice-input";
 import { useState, useEffect, useRef } from "react";
+import { useUser } from "@/hooks/useUser";
 import {
   FileText,
   Languages,
@@ -136,10 +137,11 @@ Supervised learning uses labeled training data to build predictive models:
 };
 
 export default function Dashboard() {
+  // Get authenticated user
+  const { auth0User } = useUser();
+
   // State management
   const [typingComplete, setTypingComplete] = useState(false);
-  const [showSummaryPanel, setShowSummaryPanel] = useState(false);
-  const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevel>('intermediate');
   const [isTranslated, setIsTranslated] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('Spanish');
   const [transcribedText, setTranscribedText] = useState<string>("");
@@ -147,6 +149,7 @@ export default function Dashboard() {
   const [uploadedName, setUploadedName] = useState<string>("");
   const [uploadedDuration, setUploadedDuration] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showSummaryPanel, setShowSummaryPanel] = useState(false);
 
   // Text content
   const originalText = "Welcome to today's lecture on machine learning fundamentals. We'll be covering supervised learning algorithms, including linear regression, decision trees, and neural networks. These concepts form the foundation of modern artificial intelligence and are essential for understanding how machines can learn from data to make predictions and classifications.";
@@ -267,7 +270,7 @@ export default function Dashboard() {
   return (
     <div className="relative flex min-h-screen">
       {/* Main Content */}
-      <div className={`flex-1 space-y-8 pt-8 pb-28 transition-all duration-300 ${showSummaryPanel ? 'pr-96' : ''}`}>
+      <div className="flex-1 space-y-8 py-8">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold text-blue-600">Lingo Lift</h1>
@@ -288,7 +291,7 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <VoiceInput />
+          <VoiceInput userId={auth0User?.sub} />
           <div className="mt-4">
             <Dialog>
               <TooltipProvider>
@@ -431,6 +434,7 @@ export default function Dashboard() {
 
 
 
+
       {/* Quick Actions (open dialogs) */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
@@ -530,69 +534,6 @@ export default function Dashboard() {
       {/* Recent Documents moved to dialog under "View Documents" */}
       </div>
 
-      {/* AI Summary Panel */}
-      {showSummaryPanel && (
-        <div className="fixed right-0 top-0 h-full w-96 bg-background border-l shadow-lg z-50 flex flex-col">
-          {/* Panel Header */}
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-brand" />
-                  AI Summary
-                </h2>
-                <p className="text-sm text-muted-foreground">Generated notes for your lecture</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSummaryPanel(false)}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Difficulty Toggle */}
-          <div className="p-4 border-b">
-            <label className="text-sm font-medium mb-3 block">Summary Level</label>
-            <div className="flex rounded-lg bg-muted p-1">
-              {(['beginner', 'intermediate', 'advanced'] as DifficultyLevel[]).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setDifficultyLevel(level)}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                    difficultyLevel === level
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {level.charAt(0).toUpperCase() + level.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Summary Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
-                {getSummaryContent(difficultyLevel)}
-              </pre>
-            </div>
-          </div>
-
-          {/* Panel Footer */}
-          <div className="p-4 border-t">
-            <Button className="w-full" variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Save Summary
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
