@@ -13,9 +13,123 @@ import {
   Mic,
   Settings,
   Brain,
+  MessageSquare,
+  Wand2,
+  X,
+  ChevronLeft,
+  Globe,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
+// Typing effect component for chatbot-like display
+function TypingText({
+  text,
+  speed = 30,
+  onComplete
+}: {
+  text: string;
+  speed?: number;
+  onComplete?: () => void;
+}) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, speed);
+
+      return () => clearTimeout(timeout);
+    } else if (currentIndex === text.length && onComplete) {
+      onComplete();
+    }
+  }, [currentIndex, text, speed, onComplete]);
+
+  useEffect(() => {
+    setDisplayedText("");
+    setCurrentIndex(0);
+  }, [text]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 mt-1">
+          <MessageSquare className="h-4 w-4 text-brand" />
+        </div>
+        <div className="flex-1">
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-sm leading-relaxed">
+              {displayedText}
+              {currentIndex < text.length && (
+                <span className="animate-pulse">|</span>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Difficulty level type
+type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+
+// Summary content for different difficulty levels
+const getSummaryContent = (level: DifficultyLevel): string => {
+  const summaries = {
+    beginner: `## Machine Learning Basics
+
+**What is Machine Learning?**
+Machine learning is like teaching a computer to learn from examples, just like how you learn to recognize cats by seeing many pictures of cats.
+
+**Key Concepts:**
+- **Supervised Learning**: Learning with a teacher (we give examples with correct answers)
+- **Linear Regression**: Drawing a straight line through data points
+- **Decision Trees**: Making decisions like a flowchart
+- **Neural Networks**: Connecting many simple parts to solve complex problems
+
+**Why It Matters:**
+These tools help computers make predictions and decisions automatically, making our lives easier!`,
+
+    intermediate: `## Machine Learning Fundamentals
+
+**Supervised Learning Algorithms**
+Supervised learning uses labeled training data to build predictive models:
+
+- **Linear Regression**: Fits a linear relationship between input features and continuous target variables using least squares optimization
+- **Decision Trees**: Non-parametric method that splits data recursively based on feature values to minimize impurity
+- **Neural Networks**: Multi-layer perceptrons with backpropagation for complex non-linear pattern recognition
+
+**Model Evaluation & Optimization**
+- Cross-validation for robust performance estimation
+- Feature engineering and selection techniques
+- Hyperparameter tuning for optimal model configuration`,
+
+    advanced: `## Advanced Machine Learning Theory
+
+**Supervised Learning Algorithm Analysis**
+
+**Linear Regression (Ordinary Least Squares)**
+- Objective: Minimize sum of squared residuals: Σ(y_i - ŷ_i)²
+- Assumptions: Linearity, independence, homoscedasticity, normality
+- Regularization: Ridge (L2) and Lasso (L1) penalties for overfitting prevention
+
+**Decision Trees & Ensemble Methods**
+- Information gain/Gini impurity for optimal splits
+- Bagging (Random Forest) vs Boosting (XGBoost) approaches
+- Bias-variance tradeoff in ensemble learning
+
+**Neural Network Architecture**
+- Backpropagation: Chain rule application for gradient computation
+- Activation functions: ReLU, Sigmoid, Tanh properties and derivatives
+- Optimization: SGD variants (Adam, RMSprop) with learning rate scheduling`
+  };
+
+  return summaries[level];
+};
 
 export default function Dashboard() {
   const { auth0User, isLoading } = useUser();
@@ -94,7 +208,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 py-8">
+    <div className="relative flex h-screen">
+      {/* Main Content */}
+      <div className={`flex-1 space-y-8 py-8 transition-all duration-300 ${showSummaryPanel ? 'pr-96' : ''}`}>
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold">Lingo Lift Dashboard</h1>
@@ -190,6 +306,70 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+      </div>
+
+      {/* AI Summary Panel */}
+      {showSummaryPanel && (
+        <div className="fixed right-0 top-0 h-full w-96 bg-background border-l shadow-lg z-50 flex flex-col">
+          {/* Panel Header */}
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-brand" />
+                  AI Summary
+                </h2>
+                <p className="text-sm text-muted-foreground">Generated notes for your lecture</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSummaryPanel(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Difficulty Toggle */}
+          <div className="p-4 border-b">
+            <label className="text-sm font-medium mb-3 block">Summary Level</label>
+            <div className="flex rounded-lg bg-muted p-1">
+              {(['beginner', 'intermediate', 'advanced'] as DifficultyLevel[]).map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setDifficultyLevel(level)}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                    difficultyLevel === level
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Summary Content */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                {getSummaryContent(difficultyLevel)}
+              </pre>
+            </div>
+          </div>
+
+          {/* Panel Footer */}
+          <div className="p-4 border-t">
+            <Button className="w-full" variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Save Summary
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
