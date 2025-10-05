@@ -1,7 +1,8 @@
 "use client";
 
 import { GooeySearchBar } from "@/components/ui/animated-search-bar";
-import { VoiceInput } from "@/components/voice-input";
+import RealtimeTranslationSession from "@/components/RealtimeTranslationSession";
+import { useUser } from "@/hooks/useUser";
 import {
   FileText,
   Languages,
@@ -17,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
+  const { auth0User, isLoading } = useUser();
   const recentDocuments = [
     {
       title: "Lecture Notes - Computer Science 101",
@@ -83,11 +85,19 @@ export default function Dashboard() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 py-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">UnderstandAI</h1>
+        <h1 className="text-4xl font-bold">Lingo Lift Dashboard</h1>
         <p className="text-lg text-muted-foreground">
           Transform your study materials into your preferred language
         </p>
@@ -112,21 +122,12 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Voice Input Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mic className="h-5 w-5 text-brand" />
-            Record Audio Lecture
-          </CardTitle>
-          <CardDescription>
-            Record or upload audio lectures to transcribe and translate
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <VoiceInput />
-        </CardContent>
-      </Card>
+      {/* Real-Time Translation Section */}
+      {auth0User && (
+        <div>
+          <RealtimeTranslationSession userId={auth0User.sub!} />
+        </div>
+      )}
 
       {/* Search Section */}
       <Card>
